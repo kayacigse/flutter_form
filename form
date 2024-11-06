@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Form Example',
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.purple),
+          ),
+        ),
+      ),
+      home: RegistrationForm(),
+    );
+  }
+}
+
+class RegistrationForm extends StatefulWidget {
+  @override
+  _RegistrationFormState createState() => _RegistrationFormState();
+}
+
+class _RegistrationFormState extends State<RegistrationForm> {
+  final _formKey = GlobalKey<FormState>(); // global anahtar oluşturduk
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // E-posta adresinin geçerli olup olmadığını kontrol ediyoruz
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'E-posta adresi zorunludur';
+    }
+    if (!value.contains('@')) { // içerisinde @ olmak zorunda yoksa hata
+      return 'Geçersiz e-posta adresi (E-posta adresi "@" içermelidir)';
+    }
+    return null;
+  }
+
+  // Şifre alanının doğrulaması
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Şifre zorunludur';
+    }
+    if (value.length < 6) {
+      return 'Şifre en az 6 karakter olmalıdır';
+    }
+    return null;
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      // formun doğruluğuna baktık doğruysa burda işlem yapabiliriz
+      final name = _nameController.text;
+      final email = _emailController.text;
+      final password = _passwordController.text;
+
+      // kayıt tamamlanınca snackbardan bildirim
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kayıt başarıyla tamamlandı: $name')),
+      );
+
+      // işlem bitimi alanları temizleme
+      _nameController.clear();
+      _emailController.clear();
+      _passwordController.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Kayıt Formu'),
+        backgroundColor: Colors.purple[100],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey, // Form için global anahtar
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // İsim bölümü
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'İsim',
+                      prefixIcon: Icon(Icons.person_2_outlined),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'İsim zorunludur';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  // E-posta bölümü
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'E-posta',
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    validator: _validateEmail, // E-posta doğrulama
+                  ),
+                  SizedBox(height: 16),
+                  // Şifre bölümü
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Şifre',
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                    obscureText: true, // şifreyi gizle
+                    validator: _validatePassword, // şifre doğrulama
+                  ),
+                  SizedBox(height: 20),
+                  // Kaydol butonu
+                  ElevatedButton(
+                    onPressed: _submitForm, // Formu gönder
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text('Kaydol', style: TextStyle(fontSize: 18)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
